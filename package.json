@@ -1,0 +1,24 @@
+{
+  "name": "favorite-movies",
+  "version": "1.0.0",
+  "description": "Boilerplate project created to demonstrate Node and Express core concepts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pedroarvellos/favorite-movies.git"
+  },
+  "keywords": [
+    "node",
+    "express",
+    "mongoose"
+  ],
+  "author": "Pedro Arvellos",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pedroarvellos/favorite-movies/issues"
+  },
+  "homepage": "https://github.com/pedroarvellos/favorite-movies#readme"
+}
