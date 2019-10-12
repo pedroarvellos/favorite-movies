@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -21,7 +23,13 @@ const userSchema = new mongoose.Schema({
     },
     avatar: {
         type: Buffer
-    }
+    },
+    tokens: [{
+        token: {
+            type: String,
+            required: true
+        }
+    }]
 }, {
     timestamps: true
 })
@@ -32,4 +40,43 @@ userSchema.virtual('movies', {
     foreignField: 'owner'
 })
 
-module.exports = mongoose.model('User', userSchema)
+userSchema.methods.toJSON = function () {
+    const userObject = this.toObject()
+
+    delete userObject.password
+    delete userObject.tokens
+    delete userObject.avatar
+
+    return userObject
+}
+
+userSchema.pre('save', async function (next) {
+    if(this.isModified('password')) this.password = await bcrypt.hash(this.password, 8)
+    next()
+})
+
+userSchema.methods.generateAuthToken = async function () {
+    const token = jwt.sign({ _id: this._id.toString() }, 'LF2ZGKuhPsGE439YybE3')
+
+    this.tokens = this.tokens.concat({ token })
+
+    await this.save()
+
+    return token
+}
+
+userSchema.statics.findByCredentials = async (username, password) => {
+    const user = await User.findOne({ username })
+
+    if (!user) throw new Error('Unable to login')
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch) throw new Error('Unable to login')
+
+    return user
+}
+
+const User = mongoose.model('User', userSchema)
+
+module.exports = User
