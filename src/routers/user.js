@@ -13,7 +13,7 @@ router.post('/users/signup', async (req, res) => {
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
     } catch (err) {
-        res.status(400).send(err)
+        err.message !== null ? res.status(400).send({error: err.message}) : res.status(400)
     }
 })
 
@@ -26,7 +26,7 @@ router.post('/users/login', async (req, res) => {
 
         res.send({ user: user, token })
     } catch (err) {
-        res.status(400).send(err)
+        err.message !== null ? res.status(400).send({error: err.message}) : res.status(400)
     }
 })
 
@@ -39,13 +39,32 @@ router.post('/users/logout', auth, async (req, res) => {
         await req.user.save()
 
         res.send()
-    } catch(err) {
+    } catch (err) {
         res.status(500).send()
     }
 })
 
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
+})
+
+router.patch('/users/me', auth, async (req, res) => {
+    const updates = Object.keys(req.body)
+    const allowedUpdates = ['name', 'username', 'password']
+
+    const isValid = updates.every(item => allowedUpdates.includes(item))
+
+    if (!isValid) res.status(400).send({ error: 'Invalid updates!' })
+
+    try {
+        updates.forEach((item) => req.user[item] = req.body[item])
+
+        await req.user.save()
+
+        res.send(req.user)
+    } catch (err) {
+        res.status(400).send(e)
+    }
 })
 
 module.exports = router
