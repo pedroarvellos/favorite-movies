@@ -4,6 +4,8 @@ const multer = require('multer')
 const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const errors = require('../errors/errorTypes')
+const { ValidationError, DatabaseError } = require('../errors/errors')
 
 const router = new express.Router()
 
@@ -11,11 +13,16 @@ router.post('/users/signup', async (req, res) => {
     const user = new User(req.body)
 
     try {
-        await user.save()
+        try {
+            await user.save()
+        } catch {
+            throw new DatabaseError(errors.DATABASE_USER_CREATION_FAILED)
+        }
+
         const token = await user.generateAuthToken()
         res.status(201).send({ user, token })
-    } catch (err) {
-        err.message !== null ? res.status(400).send({ error: err.message }) : res.status(400)
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
     }
 })
 
@@ -27,8 +34,8 @@ router.post('/users/login', async (req, res) => {
         const token = await user.generateAuthToken()
 
         res.send({ user: user, token })
-    } catch (err) {
-        err.message !== null ? res.status(400).send({ error: err.message }) : res.status(400)
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
     }
 })
 
@@ -38,16 +45,24 @@ router.post('/users/logout', auth, async (req, res) => {
             token != req.token
         })
 
-        await req.user.save()
+        try {
+            await req.user.save()
+        } catch {
+            throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        }
 
         res.send()
-    } catch (err) {
-        res.status(500).send()
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
     }
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 router.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 router.patch('/users/me', auth, async (req, res) => {
@@ -56,17 +71,23 @@ router.patch('/users/me', auth, async (req, res) => {
 
     const isValid = updates.every(item => allowedUpdates.includes(item))
 
-    if (!isValid) res.status(400).send({ error: 'Invalid updates!' })
-
     try {
+        if (!isValid) throw new ValidationError(errors.INVALID_UPDATE_PARAMETERS)
+
         updates.forEach((item) => req.user[item] = req.body[item])
 
-        await req.user.save()
+        try {
+            await req.user.save()
+        } catch {
+            throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        }
 
         res.send(req.user)
-    } catch (err) {
-        res.status(400).send(e)
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
     }
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 const upload = multer({
@@ -75,27 +96,45 @@ const upload = multer({
     },
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new Error('Please, upload an image.'))
+            return cb(new ValidationError(errors.INVALID_IMAGE_TYPE))
         }
         cb(undefined, true)
     }
 })
 
 router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res) => {
-    console.log("here")
-    const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
-    req.user.avatar = buffer
+    try {
+        const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer()
+        req.user.avatar = buffer
 
-    await req.user.save()
-    res.send()
-}, (err, req, res, next) => {
-    res.status(400).send({ error: err.message })
+        try {
+            await req.user.save()
+        } catch {
+            throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        }
+
+        res.send()
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
+    }
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 router.delete('/users/me/avatar', auth, async (req, res) => {
-    req.user.avatar = undefined
-    await req.user.save()
-    res.send()
+    try {
+        req.user.avatar = undefined
+        try {
+            await req.user.save()
+        } catch {
+            throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        }
+        res.send()
+    } catch ({ status, responseError }) {
+        responseError !== null && res.status(status).send({ responseError })
+    }
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 module.exports = router

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const errors = require('../errors/errorTypes')
+const { ValidationError, DatabaseError } = require('../errors/errors')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -51,7 +53,7 @@ userSchema.methods.toJSON = function () {
 }
 
 userSchema.pre('save', async function (next) {
-    if(this.isModified('password')) this.password = await bcrypt.hash(this.password, 8)
+    if (this.isModified('password')) this.password = await bcrypt.hash(this.password, 8)
     next()
 })
 
@@ -60,7 +62,11 @@ userSchema.methods.generateAuthToken = async function () {
 
     this.tokens = this.tokens.concat({ token })
 
-    await this.save()
+    try {
+        await this.save()
+    } catch {
+        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+    }
 
     return token
 }
@@ -68,11 +74,11 @@ userSchema.methods.generateAuthToken = async function () {
 userSchema.statics.findByCredentials = async (username, password) => {
     const user = await User.findOne({ username })
 
-    if (!user) throw new Error('Unable to login')
+    if (!user) throw new ValidationError(errors.LOGIN_INVALID)
 
     const isMatch = await bcrypt.compare(password, user.password)
 
-    if (!isMatch) throw new Error('Unable to login')
+    if (!isMatch) throw new ValidationError(errors.LOGIN_INVALID)
 
     return user
 }
