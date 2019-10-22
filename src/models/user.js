@@ -47,9 +47,19 @@ userSchema.methods.toJSON = function () {
 
     delete userObject.password
     delete userObject.tokens
-    delete userObject.avatar
 
     return userObject
+}
+
+userSchema.methods.getMainFields = function () {
+    return {
+        _id: this._id,
+        name: this.name,
+        username: this.username,
+        createdAt: this.createdAt,
+        updatedAt: this.updatedAt,
+        __v: this.__v,
+    };
 }
 
 userSchema.pre('save', async function (next) {
@@ -81,6 +91,12 @@ userSchema.statics.findByCredentials = async (username, password) => {
     if (!isMatch) throw new ValidationError(errors.LOGIN_INVALID)
 
     return user
+}
+
+userSchema.statics.checkIfUsernameExists = async (username) => {
+    const user = await User.findOne({ username })
+
+    if (user) throw new ValidationError(errors.INVALID_USERNAME)
 }
 
 const User = mongoose.model('User', userSchema)

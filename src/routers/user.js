@@ -10,9 +10,9 @@ const { ValidationError, DatabaseError } = require('../errors/errors')
 const router = new express.Router()
 
 router.post('/users/signup', async (req, res) => {
-    const user = new User(req.body)
-
     try {
+        await User.checkIfUsernameExists(req.body.username)
+        const user = new User(req.body)
         try {
             await user.save()
         } catch {
@@ -20,7 +20,7 @@ router.post('/users/signup', async (req, res) => {
         }
 
         const token = await user.generateAuthToken()
-        res.status(201).send({ user, token })
+        res.status(201).send({ user: user.getMainFields(), token })
     } catch ({ status, responseError }) {
         responseError !== null && res.status(status).send({ responseError })
     }
@@ -33,7 +33,7 @@ router.post('/users/login', async (req, res) => {
         const user = await User.findByCredentials(username, password)
         const token = await user.generateAuthToken()
 
-        res.send({ user: user, token })
+        res.send({ user: user.getMainFields(), token })
     } catch ({ status, responseError }) {
         responseError !== null && res.status(status).send({ responseError })
     }
@@ -77,12 +77,12 @@ router.patch('/users/me', auth, async (req, res) => {
         updates.forEach((item) => req.user[item] = req.body[item])
 
         try {
-            await req.user.save()
+            var userUpdated = await req.user.save()
         } catch {
             throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
         }
 
-        res.send(req.user)
+        res.send(userUpdated.getMainFields())
     } catch ({ status, responseError }) {
         responseError !== null && res.status(status).send({ responseError })
     }

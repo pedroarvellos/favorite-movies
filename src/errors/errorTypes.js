@@ -30,5 +30,10 @@ module.exports = {
         code: 10005,
         message: 'Please, upload a valid image.',
         httpStatus: 400
+    },
+    INVALID_USERNAME: {
+        code: 10006,
+        message: 'Please, enter a new username.',
+        httpStatus: 400
     }
 }
