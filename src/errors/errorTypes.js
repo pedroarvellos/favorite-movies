@@ -53,12 +53,17 @@ module.exports = {
     },
     DATABASE_MOVIE_DELETION_FAILED: {
         code: 10010,
-        message: 'Fail to delete movie.',
+        message: 'Fail to delete movie(s).',
         httpStatus: 400
     },
     DATABASE_USER_SEARCH_FAILED: {
         code: 10011,
         message: 'Fail to find user.',
         httpStatus: 401
+    },
+    DATABASE_MOVIE_SEARCH_FAILED: {
+        code: 10010,
+        message: 'Fail to search for movies.',
+        httpStatus: 400
     },
 }
