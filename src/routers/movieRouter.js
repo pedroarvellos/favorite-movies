@@ -1,7 +1,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const auth = require('../middleware/auth')
-const Movie = require('../models/movie')
+const auth = require('../services/auth')
+const Movie = require('../models/movieSchema')
 const errors = require('../errors/errorTypes')
 const { ValidationError, DatabaseError } = require('../errors/errors')
 
