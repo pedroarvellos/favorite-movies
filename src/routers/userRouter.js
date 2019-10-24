@@ -1,6 +1,6 @@
 const express = require('express')
 const multer = require('multer')
-const auth = require('../middleware/auth')
+const auth = require('../services/auth')
 const errors = require('../errors/errorTypes')
 const { createUser, connectUser, disconnectUser, updateUser, updateUserAvatar, deleteUserAvatar } = require('../services/userService')
 const { ValidationError } = require('../errors/errors')
