@@ -3,7 +3,7 @@ class ValidationError extends Error {
         super(errorObject.message)
         this.status = errorObject.httpStatus,
             this.responseError = {
-                errorClass: 'Validation Error',
+                errorType: 'Validation Error',
                 code: errorObject.code,
                 message: errorObject.message,
                 errorTime: Date.now()
@@ -15,7 +15,7 @@ class PermissionError extends Error {
         super(errorObject.message)
         this.status = errorObject.httpStatus,
             this.responseError = {
-                errorClass: 'Permission Error',
+                errorType: 'Permission Error',
                 code: errorObject.code,
                 message: errorObject.message,
                 errorTime: Date.now()
@@ -27,7 +27,7 @@ class DatabaseError extends Error {
         super(errorObject.message)
         this.status = errorObject.httpStatus,
             this.responseError = {
-                errorClass: 'Database Error',
+                errorType: 'Database Error',
                 code: errorObject.code,
                 message: errorObject.message,
                 errorTime: Date.now()

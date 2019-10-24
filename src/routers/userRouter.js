@@ -1,7 +1,7 @@
 const express = require('express')
 const multer = require('multer')
-const auth = require('../services/auth')
-const errors = require('../errors/errorTypes')
+const auth = require('../services/authService')
+const errors = require('../errors/userErrorTypes')
 const { createUser, connectUser, disconnectUser, updateUser, updateUserAvatar, deleteUserAvatar } = require('../services/userService')
 const { ValidationError } = require('../errors/errors')
 
@@ -59,7 +59,7 @@ const upload = multer({
     },
     fileFilter(req, file, cb) {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-            return cb(new ValidationError(errors.INVALID_IMAGE_TYPE))
+            return cb(new ValidationError(errors.USER_VALIDATION_INVALID_IMAGE_TYPE))
         }
         cb(undefined, true)
     }

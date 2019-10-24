@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const errors = require('../errors/errorTypes')
+const errors = require('../errors/userErrorTypes')
 const { ValidationError, DatabaseError } = require('../errors/errors')
 
 const userSchema = new mongoose.Schema({
@@ -75,7 +75,7 @@ userSchema.methods.generateAuthToken = async function () {
     try {
         await this.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_UPDATE_FAILED)
     }
 
     return token
@@ -85,14 +85,14 @@ userSchema.statics.findByCredentials = async (username, password) => {
     try {
         var user = await User.findOne({ username })
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_SEARCH_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_SEARCH_FAILED)
     }
 
-    if (!user) throw new ValidationError(errors.LOGIN_INVALID)
+    if (!user) throw new ValidationError(errors.USER_VALIDATION_LOGIN_INVALID)
 
     const isMatch = await bcrypt.compare(password, user.password)
 
-    if (!isMatch) throw new ValidationError(errors.LOGIN_INVALID)
+    if (!isMatch) throw new ValidationError(errors.USER_VALIDATION_LOGIN_INVALID)
 
     return user
 }
@@ -101,10 +101,10 @@ userSchema.statics.checkIfUsernameExists = async (username) => {
     try {
         var user = await User.findOne({ username })
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_SEARCH_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_SEARCH_FAILED)
     }
 
-    if (user) throw new ValidationError(errors.INVALID_USERNAME)
+    if (user) throw new ValidationError(errors.USER_VALIDATION_INVALID_USERNAME)
 }
 
 const User = mongoose.model('User', userSchema)
