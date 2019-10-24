@@ -1,4 +1,4 @@
-const User = require('../models/user')
+const User = require('../models/userShema')
 const errors = require('../errors/errorTypes')
 const { ValidationError, DatabaseError } = require('../errors/errors')
 const sharp = require('sharp')
