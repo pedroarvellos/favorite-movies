@@ -82,7 +82,11 @@ userSchema.methods.generateAuthToken = async function () {
 }
 
 userSchema.statics.findByCredentials = async (username, password) => {
-    const user = await User.findOne({ username })
+    try {
+        var user = await User.findOne({ username })
+    } catch {
+        throw new DatabaseError(errors.DATABASE_USER_SEARCH_FAILED)
+    }
 
     if (!user) throw new ValidationError(errors.LOGIN_INVALID)
 
@@ -94,7 +98,11 @@ userSchema.statics.findByCredentials = async (username, password) => {
 }
 
 userSchema.statics.checkIfUsernameExists = async (username) => {
-    const user = await User.findOne({ username })
+    try {
+        var user = await User.findOne({ username })
+    } catch {
+        throw new DatabaseError(errors.DATABASE_USER_SEARCH_FAILED)
+    }
 
     if (user) throw new ValidationError(errors.INVALID_USERNAME)
 }

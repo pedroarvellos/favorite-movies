@@ -23,7 +23,7 @@ module.exports = {
     },
     INVALID_UPDATE_PARAMETERS: {
         code: 10004,
-        message: 'Invalid parameters.',
+        message: 'Please, insert valid parameters.',
         httpStatus: 400
     },
     INVALID_IMAGE_TYPE: {
@@ -55,5 +55,10 @@ module.exports = {
         code: 10010,
         message: 'Fail to delete movie.',
         httpStatus: 400
-    }
+    },
+    DATABASE_USER_SEARCH_FAILED: {
+        code: 10011,
+        message: 'Fail to find user.',
+        httpStatus: 401
+    },
 }
