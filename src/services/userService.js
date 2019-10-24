@@ -1,5 +1,5 @@
 const User = require('../models/userShema')
-const errors = require('../errors/errorTypes')
+const errors = require('../errors/userErrorTypes')
 const { ValidationError, DatabaseError } = require('../errors/errors')
 const sharp = require('sharp')
 
@@ -10,7 +10,7 @@ const createUser = async (userRequest) => {
     try {
         await user.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_CREATION_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_CREATION_FAILED)
     }
 
     const token = await user.generateAuthToken()
@@ -41,7 +41,7 @@ const disconnectUser = async (mongooseUser, currentToken) => {
     try {
         await mongooseUser.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_UPDATE_FAILED)
     }
 }
 
@@ -51,14 +51,14 @@ const updateUser = async (userRequest, mongooseUser) => {
 
     const isValid = updates.every(item => allowedUpdates.includes(item))
 
-    if (!isValid) throw new ValidationError(errors.INVALID_UPDATE_PARAMETERS)
+    if (!isValid) throw new ValidationError(errors.USER_VALIDATION_INVALID_UPDATE_PARAMETERS)
 
     updates.forEach((item) => mongooseUser[item] = userRequest[item])
 
     try {
         var userUpdated = await mongooseUser.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_UPDATE_FAILED)
     }
 
     return userUpdated.getMainFields()
@@ -71,7 +71,7 @@ const updateUserAvatar = async (file, mongooseUser) => {
     try {
         await mongooseUser.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_UPDATE_FAILED)
     }
 }
 
@@ -80,7 +80,7 @@ const deleteUserAvatar = async (mongooseUser) => {
     try {
         await mongooseUser.save()
     } catch {
-        throw new DatabaseError(errors.DATABASE_USER_UPDATE_FAILED)
+        throw new DatabaseError(errors.USER_DATABASE_UPDATE_FAILED)
     }
 }
 
