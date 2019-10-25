@@ -1,19 +1,22 @@
 const express = require('express')
 const multer = require('multer')
-const auth = require('../services/authService')
+const auth = require('../middlewares/authentication/authMiddleware')
 const errors = require('../errors/userErrorTypes')
+const { userValidationMiddleware } = require('../middlewares/validation/userValidationMiddleware')
 const { createUser, connectUser, disconnectUser, updateUser, updateUserAvatar, deleteUserAvatar } = require('../services/userService')
 const { ValidationError } = require('../errors/errors')
 
 const router = new express.Router()
 
-router.post('/users/signup', async (req, res) => {
+router.post('/users/signup', userValidationMiddleware(), async (req, res) => {
     try {
         const userResponse = await createUser(req.body)
         res.status(201).send(userResponse)
     } catch ({ status, responseError }) {
         responseError !== null && res.status(status).send({ responseError })
     }
+}, ({ status, responseError }, req, res, next) => {
+    responseError !== null && res.status(status).send({ responseError })
 })
 
 router.post('/users/login', async (req, res) => {
@@ -42,7 +45,7 @@ router.get('/users/me', auth, async (req, res) => {
     responseError !== null && res.status(status).send({ responseError })
 })
 
-router.patch('/users/me', auth, async (req, res) => {
+router.patch('/users/me', userValidationMiddleware(), auth, async (req, res) => {
     try {
         const userUpdated = await updateUser(req.body, req.user)
         res.send(userUpdated)
