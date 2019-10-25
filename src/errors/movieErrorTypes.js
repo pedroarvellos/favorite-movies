@@ -35,5 +35,15 @@ module.exports = {
         code: moviePrefix + 1007,
         message: 'Please, enter an existing movie.',
         httpStatus: 400
+    },
+    MOVIE_VALIDATION_NAME_EMPTY: {
+        code: moviePrefix + 1008,
+        message: 'Please, make sure the name field is not empty',
+        httpStatus: 400
+    },
+    MOVIE_VALIDATION_MAX_NAME_SIZE_EXCEEDED: {
+        code: moviePrefix + 1009,
+        message: 'Please, make sure the name does not exceed 50 characters',
+        httpStatus: 400
     }
 }
