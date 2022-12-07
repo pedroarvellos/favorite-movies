@@ -24,7 +24,7 @@
   "homepage": "https://github.com/pedroarvellos/favorite-movies#readme",
   "dependencies": {
     "bcrypt": "^3.0.6",
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.3.2",
     "mongoose": "^5.7.4",
